@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Classroom</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #f5f7fa;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .navbar {
+        background: #fff;
+        border-bottom: 1px solid #e1e5e9;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2d3748;
+      }
+
+      .nav-controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .btn-primary {
+        background: #3182ce;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #2c5282;
+      }
+
+      .btn-secondary {
+        background: #e2e8f0;
+        color: #4a5568;
+      }
+
+      .btn-secondary:hover {
+        background: #cbd5e0;
+      }
+
+      .btn-danger {
+        background: #e53e3e;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #c53030;
+      }
+
+      .classroom-container {
+        display: flex;
+        height: calc(100vh - 70px);
+      }
+
+      .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .video-section {
+        flex: 1;
+        display: flex;
+        padding: 16px;
+        gap: 16px;
+      }
+
+      .video-container {
+        background: #1a202c;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .video-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+      }
+
+      .video-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background: #2d3748;
+        color: #a0aec0;
+        font-size: 16px;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .video-label {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 10;
+      }
+
+      .teacher-video {
+        flex: 2;
+      }
+
+      .student-video {
+        flex: 1;
+        min-height: 200px;
+      }
+
+      .video-controls {
+        position: absolute;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+      }
+
+      .control-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        transition: all 0.2s;
+      }
+
+      .control-btn.active {
+        background: #48bb78;
+        color: white;
+      }
+
+      .control-btn.inactive {
+        background: #e53e3e;
+        color: white;
+      }
+
+      .sidebar {
+        width: 350px;
+        background: white;
+        border-left: 1px solid #e1e5e9;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar-tabs {
+        display: flex;
+        border-bottom: 1px solid #e1e5e9;
+      }
+
+      .tab {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        background: #f7fafc;
+        border: none;
+        font-size: 14px;
+        font-weight: 500;
+        color: #4a5568;
+        transition: all 0.2s;
+      }
+
+      .tab.active {
+        background: white;
+        color: #3182ce;
+        border-bottom: 2px solid #3182ce;
+      }
+
+      .tab-content {
+        flex: 1;
+        display: none;
+        flex-direction: column;
+      }
+
+      .tab-content.active {
+        display: flex;
+      }
+
+      .chat-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+        max-height: 400px;
+      }
+
+      .message {
+        margin-bottom: 12px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        max-width: 80%;
+      }
+
+      .message.teacher {
+        background: #ebf8ff;
+        margin-left: auto;
+        text-align: right;
+      }
+
+      .message.student {
+        background: #f0fff4;
+      }
+
+      .message-sender {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .chat-input {
+        padding: 16px;
+        border-top: 1px solid #e1e5e9;
+        display: flex;
+        gap: 8px;
+      }
+
+      .chat-input input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      .whiteboard {
+        flex: 1;
+        background: white;
+        margin: 16px;
+        border-radius: 8px;
+        position: relative;
+        border: 2px dashed #cbd5e0;
+      }
+
+      .whiteboard-canvas {
+        width: 100%;
+        height: 100%;
+        cursor: crosshair;
+      }
+
+      .whiteboard-tools {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        display: flex;
+        gap: 8px;
+        background: white;
+        padding: 8px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .tool-btn {
+        width: 32px;
+        height: 32px;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+
+      .tool-btn.active {
+        background: #3182ce;
+        color: white;
+      }
+
+      .color-picker {
+        width: 32px;
+        height: 32px;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .screen-share {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #1a202c;
+        color: white;
+        margin: 16px;
+        border-radius: 8px;
+        font-size: 18px;
+      }
+
+      .bottom-toolbar {
+        background: white;
+        border-top: 1px solid #e1e5e9;
+        padding: 16px 24px;
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #48bb78;
+        display: inline-block;
+        margin-right: 6px;
+      }
+
+      @media (max-width: 768px) {
+        .classroom-container {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          height: 50%;
+        }
+
+        .video-section {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="logo">📚 ClassroomPro</div>
+      <div class="nav-controls">
+        <span><span class="status-indicator"></span>Connected</span>
+        <button class="btn btn-secondary" onclick="toggleFullscreen()">
+          ⛶ Fullscreen
+        </button>
+        <button class="btn btn-danger" onclick="leaveClass()">🚪 Leave</button>
+      </div>
+    </nav>
+
+    <div class="classroom-container">
+      <main class="main-content">
+        <div class="video-section" id="videoSection">
+          <div class="video-container teacher-video">
+            <div class="video-label">👨‍🏫 Teacher</div>
+            <video
+              id="teacherVideo"
+              autoplay
+              muted
+              playsinline
+              style="display: none"
+            ></video>
+            <div class="video-placeholder" id="teacherPlaceholder">
+              <div>📹</div>
+              <div>Click "Start Camera" to begin</div>
+            </div>
+            <div class="video-controls">
+              <button
+                class="control-btn inactive"
+                id="micBtn"
+                onclick="toggleMic()"
+              >
+                🎤
+              </button>
+              <button
+                class="control-btn inactive"
+                id="camBtn"
+                onclick="toggleCamera()"
+              >
+                📹
+              </button>
+              <button
+                class="control-btn"
+                id="shareBtn"
+                onclick="toggleScreenShare()"
+              >
+                🖥️
+              </button>
+            </div>
+          </div>
+          <div class="video-container student-video">
+            <div class="video-label">👨‍🎓 Student</div>
+            <video
+              id="studentVideo"
+              autoplay
+              muted
+              playsinline
+              style="display: none"
+            ></video>
+            <div class="video-placeholder" id="studentPlaceholder">
+              <div>📹</div>
+              <div>Waiting for student...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content active" id="whiteboardContent">
+          <div class="whiteboard">
+            <div class="whiteboard-tools">
+              <button
+                class="tool-btn active"
+                id="penTool"
+                onclick="selectTool('pen')"
+              >
+                ✏️
+              </button>
+              <button
+                class="tool-btn"
+                id="eraserTool"
+                onclick="selectTool('eraser')"
+              >
+                🧽
+              </button>
+              <button class="tool-btn" onclick="clearWhiteboard()">🗑️</button>
+              <input
+                type="color"
+                class="color-picker"
+                id="colorPicker"
+                value="#000000"
+              />
+            </div>
+            <canvas class="whiteboard-canvas" id="whiteboardCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="tab-content" id="screenContent">
+          <div class="screen-share">🖥️ Screen sharing will appear here</div>
+        </div>
+      </main>
+
+      <aside class="sidebar">
+        <div class="sidebar-tabs">
+          <button class="tab active" onclick="switchTab('chat')">
+            💬 Chat
+          </button>
+          <button class="tab" onclick="switchTab('tools')">🛠️ Tools</button>
+          <button class="tab" onclick="switchTab('files')">📁 Files</button>
+        </div>
+
+        <div class="tab-content active" id="chatTab">
+          <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+              <div class="message teacher">
+                <div class="message-sender">Teacher</div>
+                <div>Welcome to our lesson today! Ready to get started?</div>
+              </div>
+              <div class="message student">
+                <div class="message-sender">Student</div>
+                <div>Yes, I'm ready! Thank you.</div>
+              </div>
+            </div>
+            <div class="chat-input">
+              <input
+                type="text"
+                id="chatInput"
+                placeholder="Type your message..."
+                onkeypress="handleChatKeypress(event)"
+              />
+              <button class="btn btn-primary" onclick="sendMessage()">
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="toolsTab">
+          <div style="padding: 16px">
+            <button
+              class="btn btn-secondary"
+              style="width: 100%; margin-bottom: 8px"
+              onclick="switchToWhiteboard()"
+            >
+              📝 Open Whiteboard
+            </button>
+            <button
+              class="btn btn-secondary"
+              style="width: 100%; margin-bottom: 8px"
+              onclick="toggleScreenShare()"
+            >
+              🖥️ Share Screen
+            </button>
+            <button
+              class="btn btn-secondary"
+              style="width: 100%; margin-bottom: 8px"
+              onclick="recordSession()"
+            >
+              ⏺️ Record Session
+            </button>
+            <button
+              class="btn btn-secondary"
+              style="width: 100%; margin-bottom: 8px"
+              onclick="takeSnapshot()"
+            >
+              📸 Take Snapshot
+            </button>
+          </div>
+        </div>
+
+        <div class="tab-content" id="filesTab">
+          <div style="padding: 16px">
+            <button
+              class="btn btn-secondary"
+              style="width: 100%; margin-bottom: 8px"
+              onclick="uploadFile()"
+            >
+              📤 Upload File
+            </button>
+            <div
+              style="
+                margin-top: 16px;
+                padding-top: 16px;
+                border-top: 1px solid #e1e5e9;
+              "
+            >
+              <h4 style="margin-bottom: 8px; color: #4a5568">Shared Files</h4>
+              <div style="font-size: 14px; color: #718096">
+                No files shared yet
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="bottom-toolbar">
+      <button class="btn btn-secondary" onclick="showHelp()">❓ Help</button>
+      <button class="btn btn-secondary" onclick="toggleSettings()">
+        ⚙️ Settings
+      </button>
+      <button class="btn btn-primary" onclick="switchToWhiteboard()">
+        📝 Whiteboard
+      </button>
+    </div>
+
+    <script>
+      // Global variables
+      let currentTool = "pen";
+      let isDrawing = false;
+      let micEnabled = false;
+      let cameraEnabled = false;
+      let screenSharing = false;
+      let whiteboardVisible = false;
+      let localStream = null;
+      let audioContext = null;
+
+      // Initialize canvas
+      const canvas = document.getElementById("whiteboardCanvas");
+      const ctx = canvas.getContext("2d");
+
+      function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
+
+      // Video/Audio functions
+      async function initializeMedia() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "user",
+            },
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+            },
+          });
+
+          localStream = stream;
+          const teacherVideo = document.getElementById("teacherVideo");
+          teacherVideo.srcObject = stream;
+
+          return true;
+        } catch (error) {
+          console.error("Error accessing media devices:", error);
+          alert(
+            "Could not access camera/microphone. Please check permissions."
+          );
+          return false;
+        }
+      }
+
+      async function toggleCamera() {
+        if (!cameraEnabled) {
+          const success = await initializeMedia();
+          if (success) {
+            cameraEnabled = true;
+            micEnabled = true; // Auto-enable mic when camera starts
+
+            // Show video, hide placeholder
+            document.getElementById("teacherVideo").style.display = "block";
+            document.getElementById("teacherPlaceholder").style.display =
+              "none";
+
+            // Update button states
+            document.getElementById("camBtn").className = "control-btn active";
+            document.getElementById("micBtn").className = "control-btn active";
+          }
+        } else {
+          // Turn off camera
+          cameraEnabled = false;
+
+          if (localStream) {
+            localStream.getVideoTracks().forEach((track) => {
+              track.enabled = false;
+            });
+          }
+
+          // Hide video, show placeholder
+          document.getElementById("teacherVideo").style.display = "none";
+          document.getElementById("teacherPlaceholder").style.display = "flex";
+
+          // Update button state
+          document.getElementById("camBtn").className = "control-btn inactive";
+        }
+      }
+
+      function toggleMic() {
+        if (!localStream) {
+          alert("Please start your camera first to enable microphone.");
+          return;
+        }
+
+        micEnabled = !micEnabled;
+        const btn = document.getElementById("micBtn");
+
+        localStream.getAudioTracks().forEach((track) => {
+          track.enabled = micEnabled;
+        });
+
+        btn.className = micEnabled
+          ? "control-btn active"
+          : "control-btn inactive";
+        btn.innerHTML = micEnabled ? "🎤" : "🔇";
+      }
+
+      async function toggleScreenShare() {
+        if (!screenSharing) {
+          try {
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({
+              video: {
+                cursor: "always",
+              },
+              audio: false,
+            });
+
+            screenSharing = true;
+            const btn = document.getElementById("shareBtn");
+            btn.className = "control-btn active";
+
+            // Replace video with screen share
+            const teacherVideo = document.getElementById("teacherVideo");
+            teacherVideo.srcObject = screenStream;
+
+            // Handle screen share end
+            screenStream.getVideoTracks()[0].addEventListener("ended", () => {
+              screenSharing = false;
+              btn.className = "control-btn";
+
+              // Return to camera if it was enabled
+              if (cameraEnabled && localStream) {
+                teacherVideo.srcObject = localStream;
+              }
+            });
+          } catch (error) {
+            console.error("Error sharing screen:", error);
+            alert("Could not start screen sharing.");
+          }
+        } else {
+          // Stop screen sharing
+          const teacherVideo = document.getElementById("teacherVideo");
+          const currentStream = teacherVideo.srcObject;
+
+          if (currentStream) {
+            currentStream.getTracks().forEach((track) => track.stop());
+          }
+
+          screenSharing = false;
+          document.getElementById("shareBtn").className = "control-btn";
+
+          // Return to camera if enabled
+          if (cameraEnabled && localStream) {
+            teacherVideo.srcObject = localStream;
+          } else {
+            teacherVideo.style.display = "none";
+            document.getElementById("teacherPlaceholder").style.display =
+              "flex";
+          }
+        }
+      }
+
+      // Tab switching
+      function switchTab(tabName) {
+        // Remove active class from all tabs and content
+        document
+          .querySelectorAll(".tab")
+          .forEach((tab) => tab.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((content) => content.classList.remove("active"));
+
+        // Add active class to selected tab
+        event.target.classList.add("active");
+        document.getElementById(tabName + "Tab").classList.add("active");
+      }
+
+      // Video controls
+      // (Video control functions are now above in the media section)
+
+      function toggleScreenShare() {
+        screenSharing = !screenSharing;
+        const btn = document.getElementById("shareBtn");
+        btn.className = screenSharing ? "control-btn active" : "control-btn";
+
+        if (screenSharing) {
+          document.getElementById("videoSection").style.display = "none";
+          document.getElementById("screenContent").classList.add("active");
+          document
+            .getElementById("whiteboardContent")
+            .classList.remove("active");
+        } else {
+          document.getElementById("videoSection").style.display = "flex";
+          document.getElementById("screenContent").classList.remove("active");
+          if (!whiteboardVisible) {
+            document
+              .getElementById("whiteboardContent")
+              .classList.add("active");
+          }
+        }
+      }
+
+      // Whiteboard functions
+      function switchToWhiteboard() {
+        whiteboardVisible = true;
+        document.getElementById("videoSection").style.display = "none";
+        document.getElementById("whiteboardContent").classList.add("active");
+        document.getElementById("screenContent").classList.remove("active");
+        resizeCanvas();
+      }
+
+      function selectTool(tool) {
+        currentTool = tool;
+        document
+          .querySelectorAll(".tool-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        document.getElementById(tool + "Tool").classList.add("active");
+      }
+
+      function clearWhiteboard() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // Canvas drawing
+      canvas.addEventListener("mousedown", startDrawing);
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("mouseup", stopDrawing);
+
+      function startDrawing(e) {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        ctx.lineWidth = currentTool === "eraser" ? 20 : 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle =
+          currentTool === "eraser"
+            ? "#ffffff"
+            : document.getElementById("colorPicker").value;
+        ctx.globalCompositeOperation =
+          currentTool === "eraser" ? "destination-out" : "source-over";
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+
+      function stopDrawing() {
+        isDrawing = false;
+      }
+
+      // Chat functions
+      function sendMessage() {
+        const input = document.getElementById("chatInput");
+        const message = input.value.trim();
+        if (!message) return;
+
+        const chatMessages = document.getElementById("chatMessages");
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message teacher";
+        messageDiv.innerHTML = `
+                <div class="message-sender">You</div>
+                <div>${message}</div>
+            `;
+
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        input.value = "";
+      }
+
+      function handleChatKeypress(e) {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      }
+
+      // Utility functions
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+
+      function leaveClass() {
+        if (confirm("Are you sure you want to leave the classroom?")) {
+          // Stop all media streams
+          if (localStream) {
+            localStream.getTracks().forEach((track) => track.stop());
+          }
+
+          // Stop screen sharing if active
+          const teacherVideo = document.getElementById("teacherVideo");
+          if (teacherVideo.srcObject && screenSharing) {
+            teacherVideo.srcObject.getTracks().forEach((track) => track.stop());
+          }
+
+          window.close();
+        }
+      }
+
+      function recordSession() {
+        alert("Recording started! 🔴");
+      }
+
+      function takeSnapshot() {
+        alert("Snapshot saved! 📸");
+      }
+
+      function uploadFile() {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.click();
+      }
+
+      function showHelp() {
+        alert(
+          "Classroom Help:\n\n• Use video controls to manage camera/mic\n• Click whiteboard to start drawing\n• Use chat to communicate\n• Share screen for presentations"
+        );
+      }
+
+      function toggleSettings() {
+        alert("Settings panel would open here");
+      }
+
+      // Initialize
+      window.addEventListener("load", () => {
+        resizeCanvas();
+      });
+
+      window.addEventListener("resize", resizeCanvas);
+    </script>
+  </body>
+</html>
